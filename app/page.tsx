@@ -10,7 +10,7 @@ import {Input} from "@nextui-org/input";
 import {Tooltip} from "@nextui-org/tooltip";
 import {useState, useMemo} from "react";
 import {motion} from 'framer-motion'
-import { number } from "prop-types";
+import {Image} from '@nextui-org/image';
 
 
 const show = {
@@ -67,11 +67,11 @@ export default function Home() {
    }
 
 	const total_master_memory = useMemo<Number>(doCalcTotalMasterMemory, [total_memory_m, gp_resource_group_memory_limit]);
-	const total_segment_memory = useMemo<Number>(doCalcTotalSegmentMemory, [total_memory_s, gp_resource_group_memory_limit, segment_count]);
+	const total_segment_memory = useMemo<Number>(doCalcTotalSegmentMemory, [gp_resource_group_memory_limit, segment_count, total_memory_m]);
 
-	const resource_group_memory_master = useMemo(doCalcResourceGroupMemoryMaster, [memory_limit]);
-	const resource_group_memory_per_segment = useMemo(doCalcResourceGroupMemoryPerSegment, [memory_limit]);
-	const fixed_memory_per_segment = useMemo(doCalcFixedMemoryPerSegment, [memory_shared_quota])
+	const resource_group_memory_master = useMemo(doCalcResourceGroupMemoryMaster, [memory_limit, total_master_memory]);
+	const resource_group_memory_per_segment = useMemo(doCalcResourceGroupMemoryPerSegment, [memory_limit, total_segment_memory]);
+	const fixed_memory_per_segment = useMemo(doCalcFixedMemoryPerSegment, [memory_shared_quota, resource_group_memory_per_segment])
 	const fixed_memory_per_query = useMemo(doCalcFixedMemoryPerQuery, [cuncurrency, fixed_memory_per_segment]);
 	const shared_memory_per_segment = useMemo(doCalcSharedMemoryPerSegment, [resource_group_memory_per_segment, memory_shared_quota]);
 	const memory_splill_ratio = useMemo(doCalcMemorySpillRatio, [fixed_memory_per_query, cuncurrency, resource_group_memory_master]);
@@ -132,12 +132,20 @@ export default function Home() {
 		MemorySharedQuota(Number(value));
 	}
 
-	git function ChangeCuncurrency(value: string) {
+	function ChangeCuncurrency(value: string) {
 		Cuncurrency(Number(value));
 	}
 
 	return (
 		<section>
+			<Image
+				width={300}
+				height={200}
+				src="https://greenplum.org/wp-content/uploads/2020/06/gpdb_logo-768x176.png"
+				alt="NextUI Image with fallback"
+				className="mb-5"
+				isBlurred
+				/>
 			<section className="flex flex-row gap-5 mb-5">
 				<div className="basis-1/2">
 					<div className="flex w-full flex-wrap md:flex-nowrap gap-4">
@@ -258,25 +266,25 @@ export default function Home() {
 						</div>
 					</section>
 					<section className="">
-						<div className="basis-1/2">
+						<div className="basis-1/2 mb-5">
 							Fixed memory per segment:
 							<Snippet symbol="" className="ml-5">
 								{fixed_memory_per_segment?.toString()}
 							</Snippet>
 						</div>
-						<div className="basis-1/2">
+						<div className="basis-1/2 mb-5">
 							Fixed memory per query:
 							<Snippet symbol="" className="ml-5">
 								{fixed_memory_per_query?.toString()}
 							</Snippet>
 						</div>
-						<div className="basis-1/2">
+						<div className="basis-1/2 mb-5">
 							Shared memory per segment:
 							<Snippet symbol="" className="ml-5">
 								{shared_memory_per_segment?.toString()}
 							</Snippet>
 						</div>
-						<div className="basis-1/2">
+						<div className="basis-1/2 mb-5">
 							Memory spill ratio:
 							<Snippet symbol="" className="ml-5"  color="success">
 								{memory_splill_ratio?.toString()}
