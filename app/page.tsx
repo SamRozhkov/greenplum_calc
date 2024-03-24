@@ -38,29 +38,28 @@ export default function Home() {
 	const [memory_shared_quota, MemorySharedQuota] = useState<Number>(20);
 	const [cuncurrency, Cuncurrency] = useState<Number>(50);
 
+	const total_memory_m  = useMemo<Number>(doCalcTotalMemoryM, [memory_total_m, overcommit_ratio, swap]);
+	const total_memory_s  = useMemo<Number>(doCalcTotalMemoryS, [memory_total_s, overcommit_ratio, swap]);
+
 	//Функция вычисляет общую доступную память для мастера
 	function doCalcTotalMemoryM(): Number {
-		let result: Number = (Number(memory_total_m) * Number(overcommit_ratio) / 100) + Number(swap) ;
+		let result: Number = Math.floor((Number(memory_total_m) * Number(overcommit_ratio) / 100) + Number(swap));
 		return result;
 	}
 	//Функция вычисляет общую доступную память для сегмента
 	function doCalcTotalMemoryS(): Number {
-		let result: Number = (Number(memory_total_s) * Number(overcommit_ratio) / 100) + Number(swap) ;
+		let result: Number = Math.floor((Number(memory_total_s) * Number(overcommit_ratio) / 100) + Number(swap));
 		return result;
 	}
 
-	const total_memory_m  = useMemo<Number>(doCalcTotalMemoryM, [memory_total_m, overcommit_ratio, swap]);
-
-	const total_memory_s  = useMemo<Number>(doCalcTotalMemoryS, [memory_total_s, overcommit_ratio, swap]);
-
 	function doCalcTotalMasterMemory(): Number {
-		 let result: Number = Number(total_memory_m) * Number(gp_resource_group_memory_limit);
+		 let result: Number = Math.floor(Number(total_memory_m) * Number(gp_resource_group_memory_limit));
 		 return result;
 	}
 
 	function doCalcTotalSegmentMemory(): Number {
 		if (segment_count != 0) { 
-			return (Number(total_memory_m) * Number(gp_resource_group_memory_limit)) / Number(segment_count);
+			return Math.floor((Number(total_memory_m) * Number(gp_resource_group_memory_limit)) / Number(segment_count));
 		}
 		else
 			return 0;
@@ -77,27 +76,27 @@ export default function Home() {
 	const memory_splill_ratio = useMemo(doCalcMemorySpillRatio, [fixed_memory_per_query, cuncurrency, resource_group_memory_master]);
 
 	function doCalcResourceGroupMemoryMaster(): Number {
-		return Number(total_master_memory) * Number(memory_limit) / 100;
+		return Math.floor(Number(total_master_memory) * Number(memory_limit) / 100);
 	}
 
 	function doCalcSharedMemoryPerSegment(): Number {
-		return (Number(resource_group_memory_per_segment) * Number(memory_shared_quota)) / 100
+		return Math.floor((Number(resource_group_memory_per_segment) * Number(memory_shared_quota)) / 100);
 	}
 
 	function doCalcResourceGroupMemoryPerSegment(): Number {
-		return Number(total_segment_memory) * Number(memory_limit) / 100;
+		return Math.floor(Number(total_segment_memory) * Number(memory_limit) / 100);
 	}
 
 	function doCalcFixedMemoryPerSegment(): Number {
-		return Number(resource_group_memory_per_segment) * ((100 - Number(memory_shared_quota)) / 100)
+		return Math.floor(Number(resource_group_memory_per_segment) * ((100 - Number(memory_shared_quota)) / 100));
 	}
 
 	function doCalcFixedMemoryPerQuery(): Number {
-		return Number(fixed_memory_per_segment) / Number(cuncurrency);
+		return Math.floor(Number(fixed_memory_per_segment) / Number(cuncurrency));
 	}
     
 	function doCalcMemorySpillRatio(): Number {
-		return (((Number(fixed_memory_per_query) - 30) * Number(cuncurrency)) / Number(resource_group_memory_master)) * 100;
+		return Math.floor((((Number(fixed_memory_per_query) - 30) * Number(cuncurrency)) / Number(resource_group_memory_master)) * 100);
 	}
 	 
 	function ChangeMamoryTotalM(value: string){
